@@ -5,31 +5,31 @@ import React, { useState } from 'react';
 // Your specified Australian school task categories
 const TASK_CATEGORIES = [
   { id: 'marking', label: 'Marking', description: 'Assessment grading & feedback' },
-  { id: 'ilp', label: 'ILP Management', description: 'Individual Learning Plan updates & documentation' },
+  { id: 'dis_and_inc', label: 'Disability and Inclusion', description: 'ILP updates, documentation, & differentiation' },
   { id: 'compass', label: 'Compass', description: 'Chronicle entries, attendance, school admin' },
-  { id: 'behaviour', label: 'Student Behaviour Management', description: 'Incident logging, follow-ups, restorative talks' },
   { id: 'planning', label: 'Planning', description: 'Unit/lesson prep & resource creation' },
   { id: 'google_sites', label: 'Google Sites', description: 'Class site maintenance & digital learning spaces' },
+  { id: 'parent', label: 'Parent Communication', description: 'Calling, emailing, or corresponding with parents' }
 ];
 
 export default function MultiFieldWorkloadLogger() {
   // Store time spent in minutes for each task ID
   const [taskTimes, setTaskTimes] = useState<Record<string, number>>({
     marking: 0,
-    ilp: 0,
+    dis_and_inc: 0,
     compass: 0,
-    behaviour: 0,
     planning: 0,
     google_sites: 0,
+    parent: 0,
   });
 
   const [neglectedDuties, setNeglectedDuties] = useState('');
 
-  // Increment or decrement time in 15-minute increments (min 0)
-  const adjustTime = (taskId: string, deltaMinutes: number) => {
+  // Handle direct changes from the range slider
+  const handleSliderChange = (taskId: string, minutes: number) => {
     setTaskTimes((prev) => ({
       ...prev,
-      [taskId]: Math.max(0, prev[taskId] + deltaMinutes),
+      [taskId]: minutes,
     }));
   };
 
@@ -49,7 +49,6 @@ export default function MultiFieldWorkloadLogger() {
     <div className="max-w-3xl mx-auto p-6 bg-slate-50 min-h-screen">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Teacher Workload Logger</h1>
-        <p className="text-slate-500 text-sm">Log time spent outside face-to-face teaching for today.</p>
       </header>
 
       {/* Main Multi-Field Time Allocation Card */}
@@ -63,7 +62,7 @@ export default function MultiFieldWorkloadLogger() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {TASK_CATEGORIES.map((task) => {
-            const currentMins = taskTimes[task.id];
+            const currentMins = taskTimes[task.id] || 0;
             return (
               <div 
                 key={task.id} 
@@ -73,44 +72,30 @@ export default function MultiFieldWorkloadLogger() {
               >
                 <div className="flex justify-between items-start mb-1">
                   <label className="font-medium text-sm text-slate-800">{task.label}</label>
-                  <span className="font-mono font-bold text-sm text-slate-700">
+                  <span className="font-mono font-bold text-sm text-blue-700">
                     {formatTime(currentMins)}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mb-3">{task.description}</p>
+                <p className="text-xs text-slate-400 mb-4">{task.description}</p>
 
-                {/* Quick-adjustment button row */}
-                <div className="flex items-center space-x-1.5">
-                  <button
-                    type="button"
-                    onClick={() => adjustTime(task.id, -30)}
-                    disabled={currentMins === 0}
-                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 rounded text-xs font-semibold text-slate-600"
-                  >
-                    -30m
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => adjustTime(task.id, -15)}
-                    disabled={currentMins === 0}
-                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 rounded text-xs font-semibold text-slate-600"
-                  >
-                    -15m
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => adjustTime(task.id, 15)}
-                    className="px-2.5 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded text-xs font-semibold"
-                  >
-                    +15m
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => adjustTime(task.id, 30)}
-                    className="px-2.5 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded text-xs font-semibold"
-                  >
-                    +30m
-                  </button>
+                {/* Range Slider Control */}
+                <div className="space-y-1">
+                  <input
+                    type="range"
+                    min="0"
+                    max="240" // Max 8 hours (480 mins)
+                    step="15"  // Moves in 15-minute intervals
+                    value={currentMins}
+                    onChange={(e) => handleSliderChange(task.id, Number(e.target.value))}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <div className="flex justify-between text-[10px] text-slate-400 font-medium">
+                    <span>0m</span>
+                    <span>1h</span>
+                    <span>2h</span>
+                    <span>3h</span>
+                    <span>4h</span>
+                  </div>
                 </div>
               </div>
             );
@@ -119,7 +104,7 @@ export default function MultiFieldWorkloadLogger() {
       </div>
 
       {/* Neglected Duties Section */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+      <div className="bg-white border border-slate-200 shadow-sm p-6 space-y-4">
         <h2 className="text-base font-semibold text-slate-700">Duties Deprioritised / Neglected</h2>
         <p className="text-xs text-slate-500">
           Describe any essential tasks you did not have time to complete today.
