@@ -7,8 +7,8 @@ const TASK_CATEGORIES = [
   { id: 'marking', label: 'Marking', description: 'Assessment grading & feedback' },
   { id: 'dis_and_inc', label: 'Disability and Inclusion', description: 'ILP updates, documentation, & differentiation' },
   { id: 'compass', label: 'Compass', description: 'Chronicle entries, attendance, school admin' },
-  { id: 'planning', label: 'Planning', description: 'Unit/lesson prep & resource creation' },
-  { id: 'google_sites', label: 'Google Sites', description: 'Class site maintenance & digital learning spaces' },
+  { id: 'planning', label: 'Curriculum Development ', description: 'Unit/lesson prep & resource creation' },
+  { id: 'google_sites', label: 'Portal Pages and E-learning implementation', description: 'Class site maintenance & digital learning spaces' },
   { id: 'parent', label: 'Parent Communication', description: 'Calling, emailing, or corresponding with parents' }
 ];
 
@@ -22,6 +22,9 @@ export default function MultiFieldWorkloadLogger() {
     google_sites: 0,
     parent: 0,
   });
+
+  // Store face-to-face teaching hours
+  const [teachingHours, setTeachingHours] = useState<number>(0);
 
   const [neglectedDuties, setNeglectedDuties] = useState('');
 
@@ -42,8 +45,9 @@ export default function MultiFieldWorkloadLogger() {
     return `${hrs}h ${mins}m`;
   };
 
-  // Compute total time across all fields
-  const totalMinutes = Object.values(taskTimes).reduce((acc, val) => acc + val, 0);
+  // Compute total time across all fields (out-of-class + teaching)
+  const taskMinutes = Object.values(taskTimes).reduce((acc, val) => acc + val, 0);
+  const totalMinutes = taskMinutes + Math.round(teachingHours * 60);
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-slate-50 min-h-screen">
@@ -60,6 +64,7 @@ export default function MultiFieldWorkloadLogger() {
           </span>
         </div>
 
+        {/* 6 Category Sliders */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {TASK_CATEGORIES.map((task) => {
             const currentMins = taskTimes[task.id] || 0;
@@ -83,8 +88,8 @@ export default function MultiFieldWorkloadLogger() {
                   <input
                     type="range"
                     min="0"
-                    max="240" // Max 8 hours (480 mins)
-                    step="15"  // Moves in 15-minute intervals
+                    max="240"
+                    step="15"
                     value={currentMins}
                     onChange={(e) => handleSliderChange(task.id, Number(e.target.value))}
                     className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
@@ -100,6 +105,40 @@ export default function MultiFieldWorkloadLogger() {
               </div>
             );
           })}
+        </div>
+
+        {/* Face-to-Face Teaching Hours Slider */}
+        <div 
+          className={`p-4 border transition-colors ${
+            teachingHours > 0 ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-200 bg-white'
+          }`}
+        >
+          <div className="flex justify-between items-start mb-1">
+            <label className="font-medium text-sm text-slate-800">Face-to-Face Teaching Hours</label>
+            <span className="font-mono font-bold text-sm text-indigo-700">
+              {teachingHours} {teachingHours === 1 ? 'hour' : 'hours'}
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mb-4">Direct classroom instruction and duty time</p>
+
+          <div className="space-y-1">
+            <input
+              type="range"
+              min="0"
+              max="8"
+              step="0.5"
+              value={teachingHours}
+              onChange={(e) => setTeachingHours(Number(e.target.value))}
+              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            />
+            <div className="flex justify-between text-[10px] text-slate-400 font-medium">
+              <span>0h</span>
+              <span>2h</span>
+              <span>4h</span>
+              <span>6h</span>
+              <span>8h</span>
+            </div>
+          </div>
         </div>
       </div>
 
