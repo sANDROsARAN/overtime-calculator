@@ -108,7 +108,7 @@ export default function MultiFieldWorkloadLogger() {
           <h2 className="text-base font-semibold text-slate-700">
             Allocated Task Time
           </h2>
-          <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full">
+          <span className="text-xs font-semibold px-2.5 py-1 bg-red-50 text-red-700 rounded-full">
             Total Today: {formatTime(totalMinutes)}
           </span>
         </div>
@@ -122,7 +122,7 @@ export default function MultiFieldWorkloadLogger() {
                 key={task.id}
                 className={`p-4 border transition-colors ${
                   currentMins > 0
-                    ? "border-blue-200 bg-blue-50/30"
+                    ? "border-red-200 bg-red-50/30"
                     : "border-slate-200 bg-white"
                 }`}
               >
@@ -130,7 +130,7 @@ export default function MultiFieldWorkloadLogger() {
                   <label className="font-medium text-sm text-slate-800">
                     {task.label}
                   </label>
-                  <span className="font-mono font-bold text-sm text-blue-700">
+                  <span className="font-mono font-bold text-sm text-red-700">
                     {formatTime(currentMins)}
                   </span>
                 </div>
@@ -149,7 +149,7 @@ export default function MultiFieldWorkloadLogger() {
                     onChange={(e) =>
                       handleSliderChange(task.id, Number(e.target.value))
                     }
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400 font-medium">
                     <span>0m</span>
@@ -218,13 +218,13 @@ export default function MultiFieldWorkloadLogger() {
           onChange={(e) => setNeglectedDuties(e.target.value)}
           placeholder="e.g., Lacked time to log admin
      chronicle notes for student behavior in Period 4, and couldn't update Google Sites unit page..."
-          className="w-full p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[90px]"
+          className="w-full p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-red-500 min-h-22.5"
         />
 
         <button
           type="button"
           onClick={() => alert("Log submitted successfully!")}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition"
+          className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition"
         >
           Submit Daily Log
         </button>
