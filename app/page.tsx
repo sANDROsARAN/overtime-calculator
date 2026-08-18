@@ -6,10 +6,12 @@ import React, { useState } from 'react';
 const TASK_CATEGORIES = [
   { id: 'marking', label: 'Marking', description: 'Assessment grading & feedback' },
   { id: 'dis_and_inc', label: 'Disability and Inclusion', description: 'ILP updates, documentation, & differentiation' },
-  { id: 'compass', label: 'Compass', description: 'Chronicle entries, attendance, school admin' },
+  { id: 'admin', label: 'Administration', description: 'Chronicle entries, attendance, school admin, leave, eduPay' },
   { id: 'planning', label: 'Curriculum Development ', description: 'Unit/lesson prep & resource creation' },
   { id: 'google_sites', label: 'Portal Pages and E-learning implementation', description: 'Class site maintenance & digital learning spaces' },
-  { id: 'parent', label: 'Parent Communication', description: 'Calling, emailing, or corresponding with parents' }
+  { id: 'parent', label: 'Parent Communication', description: 'Calling, emailing, or corresponding with parents' },
+  { id: 'prep', label: 'Preparing for Class', description: 'Printing, materials, differentiation, seating plans, student wellbeing' },
+
 ];
 
 export default function MultiFieldWorkloadLogger() {
@@ -17,7 +19,7 @@ export default function MultiFieldWorkloadLogger() {
   const [taskTimes, setTaskTimes] = useState<Record<string, number>>({
     marking: 0,
     dis_and_inc: 0,
-    compass: 0,
+    admin: 0,
     planning: 0,
     google_sites: 0,
     parent: 0,
@@ -151,7 +153,8 @@ export default function MultiFieldWorkloadLogger() {
         <textarea
           value={neglectedDuties}
           onChange={(e) => setNeglectedDuties(e.target.value)}
-          placeholder="e.g., Lacked time to log Compass chronicle notes for student behavior in Period 4, and couldn't update Google Sites unit page..."
+          placeholder="e.g., Lacked time to log admin
+     chronicle notes for student behavior in Period 4, and couldn't update Google Sites unit page..."
           className="w-full p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[90px]"
         />
 
