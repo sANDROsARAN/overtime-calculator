@@ -159,7 +159,7 @@ export default function MultiFieldWorkloadLogger() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 bg-slate-50 min-h-screen">
+    <div className="max-w-7xl mx-auto p-6 min-h-screen">
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">
@@ -170,15 +170,20 @@ export default function MultiFieldWorkloadLogger() {
           </p>
         </div>
 
-        {/* Daily / Weekly View Switcher */}
-        <div className="inline-flex p-1 bg-slate-200/80 rounded-lg self-start sm:self-auto">
+        {/* Animated Daily / Weekly Toggle Switcher */}
+        <div className="relative inline-flex p-1 bg-slate-200/80 rounded-lg self-start sm:self-auto select-none">
+          {/* Animated Sliding Background Pill */}
+          <div
+            className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-md shadow-sm transition-transform duration-300 ease-out ${
+              isWeekly ? "translate-x-full" : "translate-x-0"
+            }`}
+          />
+
           <button
             type="button"
             onClick={() => handleModeChange("daily")}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-              !isWeekly
-                ? "bg-white text-slate-800 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+            className={`relative z-10 w-28 py-1.5 text-xs font-semibold transition-colors duration-200 cursor-pointer ${
+              !isWeekly ? "text-slate-900" : "text-slate-500 hover:text-slate-800"
             }`}
           >
             Daily Mode
@@ -186,10 +191,8 @@ export default function MultiFieldWorkloadLogger() {
           <button
             type="button"
             onClick={() => handleModeChange("weekly")}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-              isWeekly
-                ? "bg-white text-slate-800 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+            className={`relative z-10 w-28 py-1.5 text-xs font-semibold transition-colors duration-200 cursor-pointer ${
+              isWeekly ? "text-slate-900" : "text-slate-500 hover:text-slate-800"
             }`}
           >
             Weekly Mode
@@ -200,12 +203,12 @@ export default function MultiFieldWorkloadLogger() {
       {/* Main Horizontal Layout Wrapper */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Column: Sliders Section */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 shadow-sm p-6 space-y-6 rounded-lg">
+        <div className="lg:col-span-2 bg-white border border-slate-200  p-6 space-y-6 ">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
             <h2 className="text-base font-semibold text-slate-700">
               Allocated Task Time ({isWeekly ? "Weekly" : "Daily"})
             </h2>
-            <span className="text-xs font-semibold px-2.5 py-1 bg-red-50 text-red-700 rounded-full">
+            <span className="text-xs font-semibold px-2.5 py-1 bg-red-50 text-red-700 ">
               Total {isWeekly ? "This Week" : "Today"}: {formatTime(totalMinutes)}
             </span>
           </div>
@@ -217,9 +220,9 @@ export default function MultiFieldWorkloadLogger() {
               return (
                 <div
                   key={task.id}
-                  className={`p-4 border rounded-lg transition-colors ${
+                  className={`p-4 border  transition-colors ${
                     currentMins > 0
-                      ? "border-red-200 bg-red-50/30"
+                      ? "border-red-200 bg-white"
                       : "border-slate-200 bg-white"
                   }`}
                 >
@@ -246,7 +249,7 @@ export default function MultiFieldWorkloadLogger() {
                       onChange={(e) =>
                         handleSliderChange(task.id, Number(e.target.value))
                       }
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-600"
+                      className="w-full h-2 bg-slate-200  appearance-none cursor-pointer accent-red-600"
                     />
                     <div className="flex justify-between text-[10px] text-slate-400 font-medium">
                       {modeConfig.taskTicks.map((tick, idx) => (
@@ -261,11 +264,11 @@ export default function MultiFieldWorkloadLogger() {
         </div>
 
         {/* Right Column: Teaching Hours + Neglected Duties + Submit */}
-        <div className="bg-white border border-slate-200 shadow-sm p-6 space-y-4 rounded-lg lg:sticky lg:top-6">
+        <div className="bg-white border border-slate-200  p-6 space-y-4  lg:sticky lg:top-6">
           <div
-            className={`p-4 border rounded-lg transition-colors ${
+            className={`p-4 border  transition-colors ${
               teachingHours > 0
-                ? "border-indigo-200 bg-indigo-50/30"
+                ? "border-amber-400 bg-white"
                 : "border-slate-200 bg-white"
             }`}
           >
@@ -273,7 +276,7 @@ export default function MultiFieldWorkloadLogger() {
               <label className="font-medium text-sm text-slate-800">
                 Face-to-Face Teaching ({isWeekly ? "Weekly" : "Daily"})
               </label>
-              <span className="font-mono font-bold text-sm text-indigo-700">
+              <span className="font-mono font-bold text-sm text-amber-700">
                 {teachingHours} {teachingHours === 1 ? "hour" : "hours"}
               </span>
             </div>
@@ -289,7 +292,7 @@ export default function MultiFieldWorkloadLogger() {
                 step={modeConfig.teachingStep}
                 value={teachingHours}
                 onChange={(e) => setTeachingHours(Number(e.target.value))}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                className="w-full h-2 bg-slate-200  appearance-none cursor-pointer accent-amber-500"
               />
               <div className="flex justify-between text-[10px] text-slate-400 font-medium">
                 {modeConfig.teachingTicks.map((tick, idx) => (
@@ -314,13 +317,13 @@ export default function MultiFieldWorkloadLogger() {
                 ? "e.g., Lacked time to complete term planning notes and had to push back parent calls for Year 9..."
                 : "e.g., Lacked time to log admin chronicle notes for student behavior in Period 4..."
             }
-            className="w-full p-3 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-red-500 h-48 resize-none"
+            className="w-full p-3 border border-slate-200  text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-red-500 h-48 resize-none"
           />
 
           <button
             type="button"
             onClick={handleSubmit}
-            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition cursor-pointer"
+            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium   transition cursor-pointer"
           >
             Submit {isWeekly ? "Weekly" : "Daily"} Log
           </button>
