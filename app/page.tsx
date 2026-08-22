@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { supabase } from "@/lib/supabaseClient"; // Adjust path if needed
 
 // Your specified Australian school task categories
 const TASK_CATEGORIES = [
@@ -71,16 +72,14 @@ export default function MultiFieldWorkloadLogger() {
   const [teachingHours, setTeachingHours] = useState<number>(0);
 
   const [neglectedDuties, setNeglectedDuties] = useState("");
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isWeekly = viewMode === "weekly";
 
   // Mode configuration settings
   const modeConfig = {
     taskMax: isWeekly ? 900 : 180, // 15 hours (weekly) vs 3 hours (daily)
     taskStep: isWeekly ? 30 : 15, // 30-min steps (weekly) vs 15-min steps (daily)
-    taskTicks: isWeekly
-      ? ["0h", "5h", "10h", "15h"]
-      : ["0m", "1h", "2h", "3h"],
+    taskTicks: isWeekly ? ["0h", "5h", "10h", "15h"] : ["0m", "1h", "2h", "3h"],
     teachingMax: isWeekly ? 20 : 6, // 20 hours (weekly) vs 6 hours (daily)
     teachingStep: 0.5,
     teachingTicks: isWeekly
@@ -107,7 +106,7 @@ export default function MultiFieldWorkloadLogger() {
       setTaskTimes((prev) => {
         const updated: Record<string, number> = {};
         Object.keys(prev).forEach((key) => {
-          updated[key] = Math.min(240, Math.round((prev[key] / 5) / 15) * 15);
+          updated[key] = Math.min(240, Math.round(prev[key] / 5 / 15) * 15);
         });
         return updated;
       });
@@ -137,37 +136,51 @@ export default function MultiFieldWorkloadLogger() {
   // Compute total time across all task fields
   const taskMinutes = Object.values(taskTimes).reduce(
     (acc, val) => acc + val,
-    0
+    0,
   );
   const totalMinutes = taskMinutes;
 
   const handleSubmit = async () => {
-    const formattedTaskTimes: Record<string, number> = {};
-    Object.keys(taskTimes).forEach((key) => {
-      formattedTaskTimes[key] = Number(taskTimes[key]) || 0;
-    });
+    setIsSubmitting(true);
 
     const payload = {
-      mode: viewMode,
-      taskTimes: formattedTaskTimes, // Task durations in minutes
-      teachingHours: Number(teachingHours) * 60 || 0, // Teaching duration converted to minutes
-      neglectedDuties: neglectedDuties.trim(),
-      submittedAt: new Date().toISOString(),
+      log_type: viewMode, // Sends "daily" or "weekly"
+      prep_and_logistics_mins: taskTimes.prep_and_logistics,
+      curriculum_planning_mins: taskTimes.curriculum_planning,
+      marking_and_feedback_mins: taskTimes.marking_and_feedback,
+      disability_and_inclusion_mins: taskTimes.disability_and_inclusion,
+      wellbeing_and_behaviour_mins: taskTimes.wellbeing_and_behaviour,
+      parent_comm_mins: taskTimes.parent_comm,
+      staff_comm_mins: taskTimes.staff_comm,
+      admin_and_edupay_mins: taskTimes.admin_and_edupay,
+      teaching_hours: teachingHours,
+      total_mins: totalMinutes,
+      neglected_duties: neglectedDuties,
     };
 
-    console.log("Submitting payload:", payload);
+    const { data, error } = await supabase
+      .from("workload_logs")
+      .insert([payload]);
+
+    setIsSubmitting(false);
+
+    if (error) {
+      console.error("Error saving log:", error);
+      alert("Failed to submit log. Please try again.");
+    } else {
+      alert(`${viewMode === "weekly" ? "Weekly" : "Daily"} log saved successfully!`);
+      // Optional: Reset form state after success
+      setNeglectedDuties("");
+    }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 min-h-screen">
+    <div className="max-w-screen mx-auto p-6 min-h-screen">
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">
-            Teacher Workload Logger
+            Teacher Workload Tracker
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Track classroom and administrative time allocation
-          </p>
         </div>
 
         {/* Animated Daily / Weekly Toggle Switcher */}
@@ -183,7 +196,9 @@ export default function MultiFieldWorkloadLogger() {
             type="button"
             onClick={() => handleModeChange("daily")}
             className={`relative z-10 w-28 py-1.5 text-xs font-semibold transition-colors duration-200 cursor-pointer ${
-              !isWeekly ? "text-slate-900" : "text-slate-500 hover:text-slate-800"
+              !isWeekly
+                ? "text-slate-900"
+                : "text-slate-500 hover:text-slate-800"
             }`}
           >
             Daily Mode
@@ -192,7 +207,9 @@ export default function MultiFieldWorkloadLogger() {
             type="button"
             onClick={() => handleModeChange("weekly")}
             className={`relative z-10 w-28 py-1.5 text-xs font-semibold transition-colors duration-200 cursor-pointer ${
-              isWeekly ? "text-slate-900" : "text-slate-500 hover:text-slate-800"
+              isWeekly
+                ? "text-slate-900"
+                : "text-slate-500 hover:text-slate-800"
             }`}
           >
             Weekly Mode
@@ -209,7 +226,8 @@ export default function MultiFieldWorkloadLogger() {
               Allocated Task Time ({isWeekly ? "Weekly" : "Daily"})
             </h2>
             <span className="text-xs font-semibold px-2.5 py-1 bg-red-50 text-red-700 ">
-              Total {isWeekly ? "This Week" : "Today"}: {formatTime(totalMinutes)}
+              Total {isWeekly ? "This Week" : "Today"}:{" "}
+              {formatTime(totalMinutes)}
             </span>
           </div>
 
@@ -323,9 +341,12 @@ export default function MultiFieldWorkloadLogger() {
           <button
             type="button"
             onClick={handleSubmit}
-            className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium   transition cursor-pointer"
+            disabled={isSubmitting}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg shadow-sm transition"
           >
-            Submit {isWeekly ? "Weekly" : "Daily"} Log
+            {isSubmitting
+              ? "Saving to Database..."
+              : `Submit ${isWeekly ? "Weekly" : "Daily"} Log`}
           </button>
         </div>
       </div>
